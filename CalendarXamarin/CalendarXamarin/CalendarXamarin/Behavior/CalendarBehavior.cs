@@ -1,0 +1,39 @@
+﻿using CalendarXamarin.ViewModel;
+using Syncfusion.SfCalendar.XForms;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Text;
+using Xamarin.Forms;
+
+namespace CalendarXamarin.Behavior
+{
+    class CalendarBehavior : Behavior<ContentPage>
+    {
+        SfCalendar calendar;
+        public bool IsNotSelected { get; private set; }
+        protected override void OnAttachedTo(ContentPage bindable)
+        {
+            base.OnAttachedTo(bindable);
+            calendar = bindable.FindByName<SfCalendar>("calendar");
+            calendar.OnMonthCellLoaded += Calendar_OnMonthCellLoaded;
+        }
+        private void Calendar_OnMonthCellLoaded(object sender, MonthCellLoadedEventArgs e)
+        {
+            var viewModel = GetDayModelFor(e.Date, calendar);
+            e.CellBindingContext = viewModel;
+        }
+        public CalendarViewModel GetDayModelFor(DateTime date, SfCalendar calendar)
+        {
+            var selectedDate = (DateTime)calendar.SelectedDate;
+            var selected = calendar.SelectedDate != null && date.Month == selectedDate.Month &&
+                                        date.Year == selectedDate.Year && date.Day == selectedDate.Day;
+            return new CalendarViewModel()
+            {
+                Date = date.Date,
+                IsSelected = selected,
+                TextColor = selected ? Color.Yellow : Color.Black,
+            };
+        }
+    }
+}
